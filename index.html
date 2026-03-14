@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BMAD — Documentação do Framework</title>
+  <meta name="description" content="Documentação do BMAD Framework — B·M·A·D Method. Módulos, agentes e como usar." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:        #f5f6f8;
+      --surface:   #ffffff;
+      --border:    #e4e8ef;
+      --text:      #18212f;
+      --muted:     #64748b;
+      --subtle:    #94a3b8;
+      --accent:    #4f46e5;
+      --accent-l:  #eef2ff;
+      --accent-d:  #3730a3;
+      --sidebar-w: 256px;
+
+      /* Module colors */
+      --c-core: #4f46e5;
+      --c-bmm:  #0891b2;
+      --c-gds:  #059669;
+      --c-cis:  #d97706;
+      --c-tea:  #dc2626;
+      --c-wds:  #7c3aed;
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ══════════ SIDEBAR ══════════ */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 1.4rem 1.4rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-hex {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; color: white; font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .logo-text .logo-title { font-size: 1rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+    .logo-text .logo-sub   { font-size: 0.68rem; color: var(--muted); margin-top: 1px; }
+
+    /* Progress bar */
+    .progress-bar {
+      height: 2px;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--c-wds));
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
+    nav { padding: 0.75rem 0; flex: 1; }
+
+    .nav-group-title {
+      padding: 0.5rem 1.4rem 0.25rem;
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--subtle);
+      margin-top: 0.5rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.38rem 1.4rem;
+      font-size: 0.815rem;
+      color: var(--muted);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+      line-height: 1.4;
+    }
+
+    .nav-link:hover { color: var(--text); background: var(--bg); }
+
+    .nav-link.active {
+      color: var(--accent);
+      background: var(--accent-l);
+      border-left-color: var(--accent);
+      font-weight: 500;
+    }
+
+    .nav-link .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+      opacity: 0.5;
+    }
+
+    .nav-link.active .dot { opacity: 1; }
+
+    .sidebar-footer {
+      padding: 1rem 1.4rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.7rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .sidebar-footer a { color: var(--accent); text-decoration: none; }
+    .sidebar-footer a:hover { text-decoration: underline; }
+
+    /* ══════════ MAIN ══════════ */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 3.5rem 4rem 5rem;
+      max-width: calc(var(--sidebar-w) + 860px);
+    }
+
+    .section { margin-bottom: 4.5rem; }
+
+    /* ── HERO ── */
+    .hero-band {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero-pill {
+      background: var(--accent-l);
+      color: var(--accent);
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.25rem 0.75rem;
+      border-radius: 99px;
+      border: 1px solid #c7d2fe;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.15;
+      margin-bottom: 1.1rem;
+      color: var(--text);
+    }
+
+    .lead {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: #475569;
+      max-width: 620px;
+      margin-bottom: 1.4rem;
+    }
+
+    .lead strong { color: var(--text); }
+
+    h2 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.35rem; }
+
+    p { color: var(--muted); line-height: 1.7; margin-bottom: 0.8rem; font-size: 0.92rem; }
+    p strong { color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+
+    hr { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+
+    /* ── BADGES ── */
+    .badge-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+
+    .badge-indigo { background: #eef2ff; color: #4338ca; border-color: #c7d2fe; }
+    .badge-cyan   { background: #ecfeff; color: #0891b2; border-color: #a5f3fc; }
+    .badge-green  { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+    .badge-amber  { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+
+    /* ── CALLOUT ── */
+    .callout {
+      display: flex;
+      gap: 0.75rem;
+      background: var(--accent-l);
+      border: 1px solid #c7d2fe;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 0.9rem 1.1rem;
+      margin: 1.5rem 0;
+      font-size: 0.875rem;
+      color: var(--accent-d);
+      line-height: 1.6;
+    }
+
+    .callout-icon { flex-shrink: 0; font-size: 1rem; }
+
+    /* ── HOW IT WORKS TABLE ── */
+    .how-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.875rem;
+      margin: 1.4rem 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .how-table th {
+      text-align: left;
+      padding: 0.6rem 1rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--subtle);
+    }
+
+    .how-table td {
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      vertical-align: middle;
+    }
+
+    .how-table tr:last-child td { border-bottom: none; }
+    .how-table tr:hover td { background: var(--bg); }
+
+    .how-table td:first-child { color: var(--text); }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      padding: 0.15rem 0.45rem;
+      border-radius: 5px;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    /* ── ARCH DIAGRAM ── */
+    .arch-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+
+    .arch-container svg { display: block; margin: 0 auto; }
+
+    /* ── MODULE GRID ── */
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .module-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      transition: box-shadow 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--card-color, var(--accent));
+    }
+
+    .module-card:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+
+    .module-card .card-icon { font-size: 1.6rem; margin-bottom: 0.6rem; display: block; }
+    .module-card .card-slug {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--card-color, var(--accent));
+      margin-bottom: 0.25rem;
+    }
+
+    .module-card h3 { font-size: 0.95rem; margin-bottom: 0.35rem; }
+    .module-card p  { font-size: 0.8rem; margin-bottom: 0.8rem; }
+
+    .mod-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: auto; }
+
+    .mod-tag {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 99px;
+      background: color-mix(in srgb, var(--card-color) 10%, white);
+      color: var(--card-color, var(--accent));
+      border: 1px solid color-mix(in srgb, var(--card-color) 25%, white);
+    }
+
+    /* ── FLOW VISUAL ── */
+    .flow-visual {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0;
+      margin: 1.5rem 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .flow-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.1rem 0.5rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .flow-item:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      right: -0.4rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--subtle);
+      font-size: 1rem;
+      z-index: 1;
+    }
+
+    .flow-item:nth-child(odd) { background: var(--bg); }
+
+    .flow-num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.4rem;
+      flex-shrink: 0;
+    }
+
+    .flow-emoji { font-size: 1.1rem; margin-bottom: 0.3rem; }
+    .flow-label { font-size: 0.7rem; font-weight: 600; color: var(--text); }
+    .flow-tag   { font-size: 0.6rem; color: var(--subtle); margin-top: 0.15rem; }
+
+    /* ── CMD SECTION ── */
+    .cmd-section { margin-top: 2rem; }
+
+    .cmd-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      background: color-mix(in srgb, var(--sec-color) 8%, white);
+      color: var(--sec-color);
+      border: 1px solid color-mix(in srgb, var(--sec-color) 20%, white);
+    }
+
+    .cmd-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.845rem;
+      margin-bottom: 0;
+      border: 1px solid var(--border);
+      border-radius: 0 0 10px 10px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .cmd-table th {
+      text-align: left;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--subtle);
+    }
+
+    .cmd-table td {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      vertical-align: middle;
+    }
+
+    .cmd-table tr:last-child td { border-bottom: none; }
+    .cmd-table tr:hover td { background: var(--bg); }
+    .cmd-table td:first-child { width: 55%; }
+
+    .cmd-prompt {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      color: #334155;
+      white-space: normal;
+    }
+
+    .cmd-prompt::before {
+      content: '→';
+      color: var(--subtle);
+      flex-shrink: 0;
+    }
+
+    /* ── FOOTER ── */
+    .doc-footer {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--subtle);
+    }
+
+    .doc-footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 2rem 1.5rem; }
+      .module-grid { grid-template-columns: 1fr 1fr; }
+      .flow-visual { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .module-grid { grid-template-columns: 1fr; }
+      .flow-visual { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-hex">B</div>
+    <div class="logo-text">
+      <div class="logo-title">BMAD</div>
+      <div class="logo-sub">B·M·A·D Method · v6.1.1</div>
+    </div>
+  </div>
+
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <nav>
+    <div class="nav-group-title">Introdução</div>
+    <a href="#o-que-e" class="nav-link"><span class="dot"></span> O que é BMAD</a>
+    <a href="#como-funciona" class="nav-link"><span class="dot"></span> Como funciona</a>
+    <a href="#arquitetura" class="nav-link"><span class="dot"></span> Arquitetura</a>
+
+    <div class="nav-group-title">Módulos</div>
+    <a href="#mod-core" class="nav-link" style="--dot-color:#4f46e5"><span class="dot" style="background:#4f46e5"></span> core</a>
+    <a href="#mod-bmm"  class="nav-link" style="--dot-color:#0891b2"><span class="dot" style="background:#0891b2"></span> bmm</a>
+    <a href="#mod-gds"  class="nav-link" style="--dot-color:#059669"><span class="dot" style="background:#059669"></span> gds</a>
+    <a href="#mod-cis"  class="nav-link" style="--dot-color:#d97706"><span class="dot" style="background:#d97706"></span> cis</a>
+    <a href="#mod-tea"  class="nav-link" style="--dot-color:#dc2626"><span class="dot" style="background:#dc2626"></span> tea</a>
+    <a href="#mod-wds"  class="nav-link" style="--dot-color:#7c3aed"><span class="dot" style="background:#7c3aed"></span> wds</a>
+
+    <div class="nav-group-title">Referência</div>
+    <a href="#fluxo" class="nav-link"><span class="dot"></span> Fluxo típico</a>
+    <a href="#comandos" class="nav-link"><span class="dot"></span> Comandos</a>
+  </nav>
+
+  <div class="sidebar-footer">
+    Laboratório AI · Foursys<br>
+    <a href="https://github.com/bmad-code-org" target="_blank">github.com/bmad-code-org</a>
+  </div>
+</aside>
+
+<!-- ══════════ MAIN ══════════ -->
+<main class="main">
+
+  <!-- ── HERO ── -->
+  <section class="section" id="o-que-e">
+    <div class="hero-band">
+      <span class="hero-pill">Documentação Oficial</span>
+    </div>
+
+    <h1>BMAD Framework</h1>
+
+    <p class="lead">
+      <strong>BMAD</strong> (B·M·A·D Method Expanded Domains) transforma seu assistente de IA em uma <strong>equipe especializada completa</strong> — com agentes de produto, design, código, jogos e testes trabalhando juntos em um fluxo estruturado.
+    </p>
+
+    <div class="callout">
+      <span class="callout-icon">💡</span>
+      <span><strong>Conceito principal:</strong> você faz um pedido em linguagem natural, o BMAD identifica o agente certo e executa um fluxo estruturado que produz artefatos (documentos, código, relatórios). Os módulos são completamente independentes.</span>
+    </div>
+
+    <div class="badge-row">
+      <span class="badge badge-indigo">v6.1.1</span>
+      <span class="badge badge-cyan">6 módulos</span>
+      <span class="badge badge-green">70+ skills</span>
+      <span class="badge badge-amber">Multi-IDE</span>
+    </div>
+  </section>
+
+  <hr />
+
+  <!-- ── COMO FUNCIONA ── -->
+  <section class="section" id="como-funciona">
+    <h2>⚙️ Como funciona</h2>
+    <p>O BMAD funciona em três camadas: <strong>pedido em linguagem natural → agente especialista → artefato gerado</strong>. Cada agente segue um fluxo (workflow) com steps bem definidos.</p>
+
+    <table class="how-table">
+      <thead>
+        <tr>
+          <th>Você digita...</th>
+          <th>Agente ativado</th>
+          <th>Artefato gerado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>"Vamos criar um product brief"</code></td>
+          <td>Analyst · bmm</td>
+          <td><code>product-brief.md</code></td>
+        </tr>
+        <tr>
+          <td><code>"Vamos criar um GDD"</code></td>
+          <td>Game Designer · gds</td>
+          <td><code>gdd.md</code></td>
+        </tr>
+        <tr>
+          <td><code>"Dev esta story"</code></td>
+          <td>Developer · bmm</td>
+          <td>Código implementado</td>
+        </tr>
+        <tr>
+          <td><code>"Vamos criar um plano de testes"</code></td>
+          <td>Test Architect · tea</td>
+          <td>Plano + testes</td>
+        </tr>
+        <tr>
+          <td><code>"Me ajuda com brainstorming"</code></td>
+          <td>Brainstorming · core</td>
+          <td>Ideias estruturadas</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr />
+
+  <!-- ── ARQUITETURA ── -->
+  <section class="section" id="arquitetura">
+    <h2>🏗️ Arquitetura do Framework</h2>
+    <p>O BMAD é composto por um <strong>core central</strong> rodeado por módulos especializados independentes. Cada módulo tem seus próprios agentes, skills, workflows e templates.</p>
+
+    <div class="arch-container">
+      <svg width="740" height="440" viewBox="0 0 740 440" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;">
+        <defs>
+          <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8"/>
+          </marker>
+          <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/>
+          </filter>
+        </defs>
+
+        <!-- BG -->
+        <rect width="740" height="440" fill="#f8fafc" rx="10"/>
+
+        <!-- Grid subtle lines -->
+        <line x1="0" y1="220" x2="740" y2="220" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3 6"/>
+        <line x1="370" y1="0" x2="370" y2="440" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3 6"/>
+
+        <!-- Connectors from CORE to modules -->
+        <!-- top: BMM -->
+        <line x1="370" y1="178" x2="370" y2="118" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+        <!-- top-left: Agentes -->
+        <line x1="318" y1="193" x2="228" y2="118" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+        <!-- right: GDS -->
+        <line x1="462" y1="220" x2="542" y2="220" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+        <!-- bottom-right: CIS -->
+        <line x1="440" y1="254" x2="520" y2="322" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+        <!-- bottom-left: TEA -->
+        <line x1="300" y1="254" x2="220" y2="322" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+        <!-- left: WDS -->
+        <line x1="278" y1="220" x2="198" y2="220" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+
+        <!-- ── CORE (center) ── -->
+        <rect x="278" y="178" width="184" height="84" rx="12" fill="#4f46e5" filter="url(#shadow)"/>
+        <text x="370" y="208" text-anchor="middle" fill="white" font-family="Inter" font-size="15" font-weight="700">⬡ CORE</text>
+        <text x="370" y="226" text-anchor="middle" fill="#c7d2fe" font-family="Inter" font-size="10">Brainstorming · Help · Review</text>
+        <text x="370" y="241" text-anchor="middle" fill="#c7d2fe" font-family="Inter" font-size="10">Party Mode · Editorial</text>
+
+        <!-- ── BMM (top) ── -->
+        <rect x="294" y="44" width="152" height="70" rx="9" fill="white" stroke="#0891b2" stroke-width="1.5" filter="url(#shadow)"/>
+        <rect x="294" y="44" width="152" height="4" rx="2" fill="#0891b2"/>
+        <text x="370" y="68" text-anchor="middle" fill="#0891b2" font-family="Inter" font-size="12" font-weight="700">📋 bmm</text>
+        <text x="370" y="83" text-anchor="middle" fill="#475569" font-family="Inter" font-size="9.5">BMAD Master Method</text>
+        <text x="370" y="97" text-anchor="middle" fill="#94a3b8" font-family="Inter" font-size="9">Brief → PRD → Arch → Dev → QA</text>
+
+        <!-- ── Agentes (top-left) ── -->
+        <rect x="78" y="44" width="160" height="70" rx="9" fill="white" stroke="#7c3aed" stroke-width="1.5" filter="url(#shadow)"/>
+        <rect x="78" y="44" width="160" height="4" rx="2" fill="#7c3aed"/>
+        <text x="158" y="68" text-anchor="middle" fill="#7c3aed" font-family="Inter" font-size="12" font-weight="700">🤖 Agentes</text>
+        <text x="158" y="83" text-anchor="middle" fill="#475569" font-family="Inter" font-size="9.5">PM · Dev · Analyst</text>
+        <text x="158" y="97" text-anchor="middle" fill="#94a3b8" font-family="Inter" font-size="9">Architect · QA · UX Designer</text>
+
+        <!-- ── GDS (right) ── -->
+        <rect x="546" y="183" width="148" height="74" rx="9" fill="white" stroke="#059669" stroke-width="1.5" filter="url(#shadow)"/>
+        <rect x="546" y="183" width="4" rx="2" height="74" fill="#059669"/>
+        <text x="622" y="210" text-anchor="middle" fill="#059669" font-family="Inter" font-size="12" font-weight="700">🎮 gds</text>
+        <text x="622" y="226" text-anchor="middle" fill="#475569" font-family="Inter" font-size="9.5">Game Dev Studio</text>
+        <text x="622" y="241" text-anchor="middle" fill="#94a3b8" font-family="Inter" font-size="9">GDD · Narrativa · Build</text>
+
+        <!-- ── CIS (bottom-right) ── -->
+        <rect x="500" y="326" width="152" height="74" rx="9" fill="white" stroke="#d97706" stroke-width="1.5" filter="url(#shadow)"/>
+        <rect x="500" y="326" width="152" height="4" rx="2" fill="#d97706"/>
+        <text x="576" y="352" text-anchor="middle" fill="#d97706" font-family="Inter" font-size="12" font-weight="700">🎨 cis</text>
+        <text x="576" y="368" text-anchor="middle" fill="#475569" font-family="Inter" font-size="9.5">Creative Intelligence Suite</text>
+        <text x="576" y="382" text-anchor="middle" fill="#94a3b8" font-family="Inter" font-size="9">Storytelling · Inovação</text>
+
+        <!-- ── TEA (bottom-left) ── -->
+        <rect x="90" y="326" width="152" height="74" rx="9" fill="white" stroke="#dc2626" stroke-width="1.5" filter="url(#shadow)"/>
+        <rect x="90" y="326" width="152" height="4" rx="2" fill="#dc2626"/>
+        <text x="166" y="352" text-anchor="middle" fill="#dc2626" font-family="Inter" font-size="12" font-weight="700">🧪 tea</text>
+        <text x="166" y="368" text-anchor="middle" fill="#475569" font-family="Inter" font-size="9.5">Test Architecture Enterprise</text>
+        <text x="166" y="382" text-anchor="middle" fill="#94a3b8" font-family="Inter" font-size="9">TDD · ATDD · CI/CD</text>
+
+        <!-- ── WDS (left) ── -->
+        <rect x="46" y="183" width="148" height="74" rx="9" fill="white" stroke="#7c3aed" stroke-width="1.5" filter="url(#shadow)"/>
+        <rect x="46" y="183" width="148" height="4" rx="2" fill="#7c3aed"/>
+        <text x="120" y="210" text-anchor="middle" fill="#7c3aed" font-family="Inter" font-size="12" font-weight="700">🌐 wds</text>
+        <text x="120" y="226" text-anchor="middle" fill="#475569" font-family="Inter" font-size="9.5">Web Design System</text>
+        <text x="120" y="241" text-anchor="middle" fill="#94a3b8" font-family="Inter" font-size="9">Wireframes · Protótipos</text>
+
+        <!-- Legend -->
+        <rect x="30" y="420" width="8" height="8" rx="2" fill="#4f46e5"/>
+        <text x="44" y="428" fill="#94a3b8" font-family="Inter" font-size="9">Core (obrigatório)</text>
+        <rect x="145" y="420" width="8" height="8" rx="2" fill="white" stroke="#94a3b8"/>
+        <text x="159" y="428" fill="#94a3b8" font-family="Inter" font-size="9">Módulos externos</text>
+        <line x1="270" y1="424" x2="300" y2="424" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+        <text x="308" y="428" fill="#94a3b8" font-family="Inter" font-size="9">Dependência do core</text>
+      </svg>
+    </div>
+  </section>
+
+  <hr />
+
+  <!-- ── MÓDULOS ── -->
+  <section class="section" id="modulos">
+    <h2>📦 Módulos Instalados</h2>
+    <p>Cada módulo é independente. Use apenas o que o projeto precisa.</p>
+
+    <div class="module-grid">
+
+      <div class="module-card" id="mod-core" style="--card-color: var(--c-core)">
+        <span class="card-icon">🔧</span>
+        <div class="card-slug">core · v6.1.1 · built-in</div>
+        <h3>BMAD Core</h3>
+        <p>Base obrigatória. Brainstorming, revisão editorial, party mode e ajuda contextual.</p>
+        <div class="mod-tags">
+          <span class="mod-tag">Brainstorming</span>
+          <span class="mod-tag">Review</span>
+          <span class="mod-tag">Help</span>
+        </div>
+      </div>
+
+      <div class="module-card" id="mod-bmm" style="--card-color: var(--c-bmm)">
+        <span class="card-icon">📋</span>
+        <div class="card-slug">bmm · v6.1.1 · built-in</div>
+        <h3>BMAD Master Method</h3>
+        <p>Ciclo completo de produto: brief, PRD, arquitetura, stories e desenvolvimento.</p>
+        <div class="mod-tags">
+          <span class="mod-tag">PRD</span>
+          <span class="mod-tag">Stories</span>
+          <span class="mod-tag">Dev</span>
+        </div>
+      </div>
+
+      <div class="module-card" id="mod-gds" style="--card-color: var(--c-gds)">
+        <span class="card-icon">🎮</span>
+        <div class="card-slug">gds · v0.2.1 · externo</div>
+        <h3>Game Dev Studio</h3>
+        <p>Desenvolvimento de jogos do zero: GDD, narrativa, arquitetura e produção.</p>
+        <div class="mod-tags">
+          <span class="mod-tag">GDD</span>
+          <span class="mod-tag">Narrativa</span>
+          <span class="mod-tag">Build</span>
+        </div>
+      </div>
+
+      <div class="module-card" id="mod-cis" style="--card-color: var(--c-cis)">
+        <span class="card-icon">🎨</span>
+        <div class="card-slug">cis · v0.1.8 · externo</div>
+        <h3>Creative Intelligence Suite</h3>
+        <p>Criatividade, inovação e apresentações. Storytelling e design thinking.</p>
+        <div class="mod-tags">
+          <span class="mod-tag">Storytelling</span>
+          <span class="mod-tag">Inovação</span>
+        </div>
+      </div>
+
+      <div class="module-card" id="mod-tea" style="--card-color: var(--c-tea)">
+        <span class="card-icon">🧪</span>
+        <div class="card-slug">tea · v1.7.0 · externo</div>
+        <h3>Test Architecture Enterprise</h3>
+        <p>Estratégia de testes completa: TDD, ATDD, automação, CI/CD e rastreabilidade.</p>
+        <div class="mod-tags">
+          <span class="mod-tag">TDD</span>
+          <span class="mod-tag">CI/CD</span>
+          <span class="mod-tag">Automação</span>
+        </div>
+      </div>
+
+      <div class="module-card" id="mod-wds" style="--card-color: var(--c-wds)">
+        <span class="card-icon">🌐</span>
+        <div class="card-slug">wds · v0.3.0 · externo</div>
+        <h3>Web Design System</h3>
+        <p>Design de interfaces: design system, wireframes, protótipos e assets visuais.</p>
+        <div class="mod-tags">
+          <span class="mod-tag">Wireframes</span>
+          <span class="mod-tag">Protótipos</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr />
+
+  <!-- ── FLUXO ── -->
+  <section class="section" id="fluxo">
+    <h2>🔄 Fluxo Típico de Projeto</h2>
+    <p>Siga o fluxo completo ou <strong>pule direto para qualquer etapa</strong>. Cada step é independente.</p>
+
+    <div class="flow-visual">
+      <div class="flow-item">
+        <div class="flow-num">1</div>
+        <div class="flow-emoji">💡</div>
+        <div class="flow-label">Ideia</div>
+        <div class="flow-tag">—</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-num">2</div>
+        <div class="flow-emoji">📄</div>
+        <div class="flow-label">Brief</div>
+        <div class="flow-tag">bmm</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-num">3</div>
+        <div class="flow-emoji">📋</div>
+        <div class="flow-label">PRD</div>
+        <div class="flow-tag">bmm</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-num">4</div>
+        <div class="flow-emoji">🏗️</div>
+        <div class="flow-label">Arquitetura</div>
+        <div class="flow-tag">bmm</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-num">5</div>
+        <div class="flow-emoji">📖</div>
+        <div class="flow-label">Stories</div>
+        <div class="flow-tag">bmm</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-num">6</div>
+        <div class="flow-emoji">💻</div>
+        <div class="flow-label">Dev</div>
+        <div class="flow-tag">bmm</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-num">7</div>
+        <div class="flow-emoji">✅</div>
+        <div class="flow-label">Testes</div>
+        <div class="flow-tag">tea</div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:1rem;">
+      <span class="callout-icon">⚡</span>
+      <span><strong>Dica:</strong> Para features pequenas, vá direto ao dev. Ex: <em>"Crie uma tela de login em HTML/CSS com validação"</em> — sem precisar de brief ou PRD.</span>
+    </div>
+  </section>
+
+  <hr />
+
+  <!-- ── COMANDOS ── -->
+  <section class="section" id="comandos">
+    <h2>💬 Comandos por Módulo</h2>
+    <p>Todos os comandos funcionam em <strong>linguagem natural</strong> em português ou inglês. Não é necessário decorar sintaxe.</p>
+
+    <!-- core -->
+    <div class="cmd-section" id="cmd-core">
+      <div class="cmd-header" style="--sec-color: var(--c-core)">🔧 core — Utilitários gerais</div>
+      <table class="cmd-table">
+        <thead><tr><th>Comando</th><th>Ação</th></tr></thead>
+        <tbody>
+          <tr><td><span class="cmd-prompt">"O que devo fazer agora?"</span></td><td>Ajuda contextual com base no projeto</td></tr>
+          <tr><td><span class="cmd-prompt">"Me ajuda com brainstorming sobre X"</span></td><td>Sessão interativa de ideação</td></tr>
+          <tr><td><span class="cmd-prompt">"Revisa a prosa deste documento"</span></td><td>Revisão editorial de texto</td></tr>
+          <tr><td><span class="cmd-prompt">"Ativa o party mode"</span></td><td>Todos os agentes debatem juntos</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- bmm -->
+    <div class="cmd-section" id="cmd-bmm">
+      <div class="cmd-header" style="--sec-color: var(--c-bmm)">📋 bmm — Ciclo de produto</div>
+      <table class="cmd-table">
+        <thead><tr><th>Comando</th><th>Artefato gerado</th></tr></thead>
+        <tbody>
+          <tr><td><span class="cmd-prompt">"Vamos criar um product brief"</span></td><td><code>product-brief.md</code></td></tr>
+          <tr><td><span class="cmd-prompt">"Vamos criar um PRD"</span></td><td><code>prd.md</code></td></tr>
+          <tr><td><span class="cmd-prompt">"Vamos criar a arquitetura"</span></td><td><code>architecture.md</code></td></tr>
+          <tr><td><span class="cmd-prompt">"Cria os épicos e stories"</span></td><td><code>epics.md</code></td></tr>
+          <tr><td><span class="cmd-prompt">"Dev esta story [arquivo]"</span></td><td>Código-fonte implementado</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- gds -->
+    <div class="cmd-section" id="cmd-gds">
+      <div class="cmd-header" style="--sec-color: var(--c-gds)">🎮 gds — Game Dev</div>
+      <table class="cmd-table">
+        <thead><tr><th>Comando</th><th>Artefato gerado</th></tr></thead>
+        <tbody>
+          <tr><td><span class="cmd-prompt">"Vamos criar um game brief"</span></td><td><code>game-brief.md</code></td></tr>
+          <tr><td><span class="cmd-prompt">"Cria o game design document"</span></td><td><code>gdd.md</code></td></tr>
+          <tr><td><span class="cmd-prompt">"Vamos criar o design de narrativa"</span></td><td><code>narrative.md</code></td></tr>
+          <tr><td><span class="cmd-prompt">"Dev esta story"</span></td><td>Código do jogo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- tea -->
+    <div class="cmd-section" id="cmd-tea">
+      <div class="cmd-header" style="--sec-color: var(--c-tea)">🧪 tea — Testes e qualidade</div>
+      <table class="cmd-table">
+        <thead><tr><th>Comando</th><th>Ação</th></tr></thead>
+        <tbody>
+          <tr><td><span class="cmd-prompt">"Vamos criar um plano de testes"</span></td><td>Estratégia e prioridades de teste</td></tr>
+          <tr><td><span class="cmd-prompt">"Vamos escrever acceptance tests"</span></td><td>Testes ATDD gerados</td></tr>
+          <tr><td><span class="cmd-prompt">"Configura o framework de testes"</span></td><td>Setup Playwright ou Cypress</td></tr>
+          <tr><td><span class="cmd-prompt">"Configura o pipeline de CI"</span></td><td>CI/CD com quality gates</td></tr>
+          <tr><td><span class="cmd-prompt">"Revisa os testes"</span></td><td>Relatório de qualidade com score</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- wds -->
+    <div class="cmd-section" id="cmd-wds">
+      <div class="cmd-header" style="--sec-color: var(--c-wds)">🌐 wds — Web Design</div>
+      <table class="cmd-table">
+        <thead><tr><th>Comando</th><th>Ação</th></tr></thead>
+        <tbody>
+          <tr><td><span class="cmd-prompt">"Vamos criar um design system"</span></td><td>Tokens, componentes e guia visual</td></tr>
+          <tr><td><span class="cmd-prompt">"Cria os wireframes"</span></td><td>Wireframes da tela especificada</td></tr>
+          <tr><td><span class="cmd-prompt">"Vamos criar um protótipo"</span></td><td>HTML interativo e navegável</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <div class="doc-footer">
+    <p>BMAD v6.1.1 · Laboratório AI Foursys · 2026</p>
+    <p style="margin-top:0.3rem;">
+      <a href="https://github.com/bmad-code-org" target="_blank">github.com/bmad-code-org</a>
+    </p>
+  </div>
+
+</main>
+
+<script>
+  // Active nav on scroll
+  const sections = document.querySelectorAll('[id]');
+  const links = document.querySelectorAll('.nav-link');
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        links.forEach(l => l.classList.remove('active'));
+        const al = document.querySelector(`.nav-link[href="#${id}"]`);
+        if (al) al.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => io.observe(s));
+
+  // Reading progress bar
+  const fill = document.getElementById('progressFill');
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
+    fill.style.width = Math.min(pct, 100) + '%';
+  });
+</script>
+
+</body>
+</html>
